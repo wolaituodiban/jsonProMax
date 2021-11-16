@@ -26,7 +26,7 @@ class JsonPathTree(JsonPathNode):
     https://jsonpath.com/
     https://goessner.net/articles/JsonPath/
     """
-
+    # todo 确保不会修改原对象，报错时能定位，优化代码逻辑（考虑删除对..的支持以提升性能）
     def __init__(self, processors: List[Union[Tuple[str], Tuple[str, Operator]]] = None):
         super().__init__()
 
