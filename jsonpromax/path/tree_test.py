@@ -87,53 +87,43 @@ def preprocessor(df):
         yield obj
 
 
+json_path_tree = jpm.JsonPathTree(
+    processors=[
+        ('$.SMALL_LOAN',),
+        ('$.*', jpm.Timestamp4('crt_tim', '%Y-%m-%d %H:%M:%S', ['day', 'hour', 'weekday'])),
+        ('$.*', jpm.Timestamp4('rep_tim', '%Y-%m-%d %H:%M:%S', ['day', 'hour', 'weekday'])),
+        ('$.*', jpm.Timestamp4('rep_dte', '%Y-%m-%d', ['day', 'weekday'])),
+        ('$.*.bsy_typ', jpm.Lower()),
+        ('$.*.ded_typ', jpm.Lower()),
+        ('$.*.bsy_typ', jpm.Split('_')),
+        ('$.*.ded_typ', jpm.Split('_')),
+        ('$.*', jpm.Delete({'crt_tim', 'rep_tim', 'rep_dte', 'prc_amt', 'adt_lmt', 'avb_lmt'}))
+    ],
+    inplace=False
+)
+
+
 def test():
-    json_path_tree = jpm.JsonPathTree(
-        processors=[
-            ('$.SMALL_LOAN',),
-            ('$.*', jpm.Timestamp4('crt_tim', '%Y-%m-%d %H:%M:%S', ['day', 'hour', 'weekday'], error=False, warning=False)),
-            ('$.*', jpm.Timestamp4('rep_tim', '%Y-%m-%d %H:%M:%S', ['day', 'hour', 'weekday'], error=False, warning=False)),
-            ('$.*', jpm.Timestamp4('rep_dte', '%Y-%m-%d', ['day', 'weekday'], error=False, warning=False)),
-            ('$.*.bsy_typ', jpm.Lower()),
-            ('$.*.ded_typ', jpm.Lower()),
-            ('$.*.bsy_typ', jpm.Split('_')),
-            ('$.*.ded_typ', jpm.Split('_')),
-            ('$.*', jpm.Delete(['crt_tim', 'rep_tim', 'rep_dte', 'prc_amt', 'adt_lmt', 'avb_lmt']))
-        ]
-    )
+
     print(json_path_tree)
-    standard_answer = list(preprocessor(data))
-    answer = [
-        json_path_tree(obj, now=crt_dte)
-        for obj, crt_dte
-        in zip(
-            data.json.apply(json.loads),
-            data.crt_dte.apply(lambda x: datetime.strptime(x, '%Y-%m-%d')))
-    ]
-    print(1)
-    print(json.dumps(answer, indent=1))
-    print(2)
-    print(json.dumps(standard_answer, indent=1))
+    standard_answer = next(preprocessor(data))
+    obj = json.loads(data.json[0])
+    answer = json_path_tree(obj, now=datetime.strptime(data.crt_dte[0], '%Y-%m-%d'))
+    # print(json.dumps(answer, indent=1))
     assert answer == standard_answer, json.dumps(jpm.json_diff(answer, standard_answer), indent=1)
+    assert obj == json.loads(data.json[0])
 
 
 def speed():
-    df = pd.concat([data] * 10000)
-    json_path_tree = jpm.JsonPathTree(
-        processors=[
-            ('$.SMALL_LOAN',),
-            ('$.*', jpm.Timestamp4('crt_tim', '%Y-%m-%d %H:%M:%S', ['day', 'hour', 'weekday'], error=False, warning=False)),
-            ('$.*', jpm.Timestamp4('rep_tim', '%Y-%m-%d %H:%M:%S', ['day', 'hour', 'weekday'], error=False, warning=False)),
-            ('$.*', jpm.Timestamp4('rep_dte', '%Y-%m-%d', ['day', 'weekday'], error=False, warning=False)),
-            ('$.*.bsy_typ', jpm.Lower()),
-            ('$.*.ded_typ', jpm.Lower()),
-            ('$.*.bsy_typ', jpm.Split('_')),
-            ('$.*.ded_typ', jpm.Split('_')),
-            ('$.*', jpm.Delete(['crt_tim', 'rep_tim', 'rep_dte', 'prc_amt', 'adt_lmt', 'avb_lmt']))
-        ]
-    )
+    df = pd.concat([data] * 100000)
 
-    for row in tqdm(df.itertuples(), total=df.shape[0]):
+    for row in tqdm(df.itertuples(), total=df.shape[0], desc='outplace'):
+        obj = json.loads(row[1])
+        crt_dte = datetime.strptime(row[2], '%Y-%m-%d')
+        answer = json_path_tree(obj, now=crt_dte)
+
+    json_path_tree.inplace(True)
+    for row in tqdm(df.itertuples(), total=df.shape[0], desc='inplace'):
         obj = json.loads(row[1])
         crt_dte = datetime.strptime(row[2], '%Y-%m-%d')
         answer = json_path_tree(obj, now=crt_dte)

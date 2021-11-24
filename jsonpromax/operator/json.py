@@ -7,25 +7,16 @@ from ..utils import unstructurize_dict
 
 
 class JsonDumper(Operator):
-    def __init__(self, error=False):
-        super().__init__()
-        self.error = error
+    def __init__(self):
+        super().__init__(inplace=False)
 
     def __call__(self, obj, **kwargs):
-        try:
-            return py_json.loads(obj)
-        except py_json.JSONDecodeError as e:
-            if self.error:
-                raise e
-        return obj
-
-    def __repr__(self):
-        return '{}(error={})'.format(self.__class__.__name__, self.error)
+        return py_json.loads(obj)
 
 
 class Unstructurizer(Operator):
     def __init__(self, preserved: Set[str] = None, start_level=0, end_level=0):
-        super().__init__()
+        super().__init__(inplace=False)
         self.preserved = preserved
         self.start_level = start_level
         self.end_level = end_level
@@ -33,27 +24,25 @@ class Unstructurizer(Operator):
     def __call__(self, obj, **kwargs):
         return unstructurize_dict(obj, preserved=self.preserved, start_level=self.start_level, end_level=self.end_level)
 
-    def __repr__(self):
-        return '{}(preserved={}, start_level={}, end_level={})'.format(
-            self.__class__.__name__, self.preserved, self.start_level, self.end_level)
+    def extra_repr(self):
+        return 'preserved={}, start_level={}, end_level={}'.format(self.preserved, self.start_level, self.end_level)
 
 
 class DictGetter(Operator):
     def __init__(self, keys: Set[str]):
-        super(DictGetter, self).__init__()
+        super(DictGetter, self).__init__(inplace=False)
         self.keys = keys
 
     def __call__(self, obj, **kwargs):
         return {k: obj[k] for k in self.keys if k in obj}
 
-    def __repr__(self):
-        return '{}(keys={})'.format(
-            self.__class__.__name__, self.keys)
+    def extra_repr(self) -> str:
+        return 'keys={}'.format(self.keys)
 
 
 class ConcatList(Operator):
     def __init__(self, inputs: set, output: str):
-        super(ConcatList, self).__init__()
+        super(ConcatList, self).__init__(inplace=False)
         assert isinstance(inputs, (list, tuple, set))
         self.inputs = set(inputs)
         self.output = output
@@ -67,6 +56,5 @@ class ConcatList(Operator):
                 output[k] = v
         return output
 
-    def __repr__(self):
-        return '{}(inputs={}, output={})'.format(
-            self.__class__.__name__, self.inputs, self.output)
+    def extra_repr(self):
+        return 'inputs={}, output={}'.format(self.inputs, self.output)

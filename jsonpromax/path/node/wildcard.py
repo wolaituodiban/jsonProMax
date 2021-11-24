@@ -2,27 +2,49 @@ from .base import JsonPathNode
 
 
 class Wildcard(JsonPathNode):
-    def __init__(self):
-        super().__init__()
-        self.key_cache = None
+    def __init__(self, inplace=False):
+        super().__init__(inplace=inplace)
 
-    def get(self, obj) -> list:
-        if isinstance(obj, list):
-            return obj
-        elif isinstance(obj, dict):
-            self.key_cache = obj.keys()
-            return list(obj.values())
-        else:
-            return []
-
-    def update(self, obj, processed_objs):
+    def _call(self, obj, **kwargs):
         if isinstance(obj, dict):
-            for key, value in zip(self.key_cache, processed_objs):
-                obj[key] = value
+            output = dict()
+            for k, v in obj.items():
+                for child_or_op in self.childs_or_processors:
+                    v = child_or_op(v, **kwargs)
+                output[k] = v
+            return output
         elif isinstance(obj, list):
-            for i, value in enumerate(processed_objs):
-                obj[i] = value
+            output = []
+            for v in obj:
+                for child_or_op in self.childs_or_processors:
+                    v = child_or_op(v, **kwargs)
+                output.append(v)
+            return output
         return obj
+
+    def _call_inplace(self, obj, **kwargs):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                for child_or_op in self.childs_or_processors:
+                    v = child_or_op(v, **kwargs)
+                obj[k] = v
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                for child_or_op in self.childs_or_processors:
+                    v = child_or_op(v, **kwargs)
+                obj[i] = v
+        return obj
+
+    def __call__(self, obj, **kwargs):
+        """
+        计算逻辑，深层优先，同层按照注册顺序排序
+        :param obj: 输入的对象
+        :param kwargs:
+        :return:
+        """
+        if len(self.childs_or_processors) == 0:
+            return obj
+        return self.call(obj, **kwargs)
 
     def is_duplicate(self, other) -> bool:
         return type(self) == type(other)

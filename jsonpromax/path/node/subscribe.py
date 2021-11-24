@@ -2,19 +2,22 @@ from .base import JsonPathNode
 
 
 class Subscript(JsonPathNode):
-    def __init__(self, index):
-        super().__init__()
-        self.index = index
+    def __init__(self, index, inplace=False):
+        super().__init__(inplace=inplace)
+        self.index = int(index)
 
-    def get(self, obj) -> list:
-        if isinstance(obj, list) and len(obj) > self.index:
-            return [obj[self.index]]
+    def get(self, obj):
+        if len(obj) > self.index:
+            return obj[self.index], True
         else:
-            return []
+            return None, False
 
-    def update(self, obj, processed_objs: list):
-        if len(processed_objs) > 0:
-            obj[self.index] = processed_objs[0]
+    def _call(self, obj, new_obj, **kwargs):
+        return [new_obj if i == self.index else v for i, v in enumerate(obj)]
+
+    def _call_inplace(self, obj, new_obj, **kwargs):
+        if len(obj) > self.index:
+            obj[self.index] = new_obj
         return obj
 
     def is_duplicate(self, other) -> bool:

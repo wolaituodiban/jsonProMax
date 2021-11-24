@@ -4,15 +4,32 @@ from ...operator import Operator
 
 
 class JsonPathNode(Operator):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, inplace=False):
         self.childs_or_processors: List[Union[JsonPathNode, Operator]] = []
+        super().__init__(inplace=inplace)
 
-    def get(self, obj) -> list:
-        raise NotImplementedError
+    def inplace(self, inplace: bool):
+        super().inplace(inplace)
+        for child_or_op in self.childs_or_processors:
+            child_or_op.inplace(inplace)
 
-    def update(self, obj, processed_objs: list):
-        raise NotImplementedError
+    def get(self, obj):
+        """
+
+        Args:
+            obj:
+
+        Returns:
+            obj: 拿到的对象
+            flag: 对象是否存在
+        """
+        return obj, True
+
+    def _call(self, obj, new_obj, **kwargs):
+        return new_obj
+
+    def _call_inplace(self, obj, new_obj, **kwargs):
+        return new_obj
 
     def __call__(self, obj, **kwargs):
         """
@@ -21,17 +38,14 @@ class JsonPathNode(Operator):
         :param kwargs:
         :return:
         """
+        new_obj, flag = self.get(obj)
         if len(self.childs_or_processors) == 0:
-            output = self.get(obj)
-            if len(output) == 1:
-                output = output[0]
-            return output
-        processed_objs = []
-        for child_obj in self.get(obj):
-            for child_or_processor in self.childs_or_processors:
-                child_obj = child_or_processor(child_obj, **kwargs)
-            processed_objs.append(child_obj)
-        return self.update(obj, processed_objs=processed_objs)
+            return new_obj
+        if not flag:
+            return obj
+        for child_or_op in self.childs_or_processors:
+            new_obj = child_or_op(new_obj, **kwargs)
+        return self.call(obj, new_obj, **kwargs)
 
     def is_duplicate(self, other) -> bool:
         raise NotImplementedError
@@ -62,8 +76,7 @@ class JsonPathNode(Operator):
         self.childs_or_processors.append(other)
         return other
 
-    @staticmethod
-    def extra_repr():
+    def extra_repr(self):
         return 'root:$'
 
     def __repr__(self):

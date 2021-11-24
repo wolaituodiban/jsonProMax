@@ -1,7 +1,6 @@
 from typing import Dict
 from .base import JsonPathNode
 from .child import Child
-from .recursive_descent import RecursiveDescent
 from .subscribe import Subscript
 from .wildcard import Wildcard
 

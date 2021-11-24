@@ -26,19 +26,14 @@ class JsonPathTree(JsonPathNode):
     https://jsonpath.com/
     https://goessner.net/articles/JsonPath/
     """
-    # todo 确保不会修改原对象，报错时能定位，优化代码逻辑（考虑删除对..的支持以提升性能）
-    def __init__(self, processors: List[Union[Tuple[str], Tuple[str, Operator]]] = None):
-        super().__init__()
+    def __init__(self, processors: List[Union[Tuple[str], Tuple[str, Operator]]] = None, inplace=False):
+        super().__init__(inplace=inplace)
 
         if processors is not None:
             for args in processors:
                 insert_node(self, *args)
 
-    def get(self, obj) -> list:
-        return [obj]
-
-    def update(self, obj, processed_objs: list):
-        return processed_objs[0]
+        self.inplace(inplace)
 
     def is_duplicate(self, other) -> bool:
         raise NotImplementedError

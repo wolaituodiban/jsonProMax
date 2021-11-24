@@ -2,8 +2,8 @@ from .operator import Operator
 
 
 class Sorted(Operator):
-    def __init__(self, key=None, reverse=False):
-        super().__init__()
+    def __init__(self, key=None, reverse=False, inplace=False):
+        super().__init__(inplace=inplace)
         if key:
             assert isinstance(key, (list, tuple, str))
         self.key = key

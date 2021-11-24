@@ -3,19 +3,22 @@ from .base import JsonPathNode
 
 
 class Child(JsonPathNode):
-    def __init__(self, child_name):
-        super().__init__()
+    def __init__(self, child_name, inplace=False):
+        super().__init__(inplace=inplace)
         self.child_name = child_name
 
-    def get(self, obj) -> list:
-        if isinstance(obj, dict) and self.child_name in obj:
-            return [obj[self.child_name]]
+    def get(self, obj):
+        if self.child_name in obj:
+            return obj[self.child_name], True
         else:
-            return []
+            return None, False
 
-    def update(self, obj, processed_objs: list):
-        if len(processed_objs) > 0:
-            obj[self.child_name] = processed_objs[0]
+    def _call(self, obj, new_obj, **kwargs):
+        return {k: new_obj if k == self.child_name else v for k, v in obj.items()}
+
+    def _call_inplace(self, obj, new_obj, **kwargs):
+        if self.child_name in obj:
+            obj[self.child_name] = new_obj
         return obj
 
     def is_duplicate(self, other) -> bool:

@@ -1,20 +1,16 @@
 import jsonpromax as jpm
-import traceback
 
 
 def test_rename():
     op = jpm.Rename('a', 'b')
-
-    def test_not_dict():
-        try:
-            op([1])
-        except Exception:
-            traceback.print_exc()
-            print('success')
-
-    test_not_dict()
+    a = {'a': 1}
+    b = op(a)
+    assert a == {'a': 1}, a
+    assert b == {'b': 1}, b
+    op.inplace(inplace=True)
+    c = op(a)
+    assert c == {'b': 1} == a, (a, c)
 
 
 if __name__ == '__main__':
     test_rename()
-    print('aha')
