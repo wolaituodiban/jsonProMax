@@ -1,3 +1,4 @@
+import json
 import sys
 import traceback
 from typing import Union, List
@@ -6,8 +7,10 @@ from ...operator import Operator
 
 
 class JsonPathNode(Operator):
-    def __init__(self, inplace=False):
+    def __init__(self, inplace=False, error=False, warning=False):
         self.childs_or_processors: List[Union[JsonPathNode, Operator]] = []
+        self.error = error
+        self.warning = warning
         super().__init__(inplace=inplace)
 
     def inplace(self, inplace: bool):
@@ -45,13 +48,17 @@ class JsonPathNode(Operator):
             return new_obj
         if not flag:
             return obj
-        for child_or_op in self.childs_or_processors:
+        for i, child_or_op in enumerate(self.childs_or_processors):
             try:
                 new_obj = child_or_op(new_obj, **kwargs)
             except:
-                print('current node:', self, file=sys.stderr)
-                print('child node:', child_or_op, file=sys.stderr)
-                traceback.print_exc()
+                if self.warning:
+                    print('current node:\n', self, file=sys.stderr)
+                    print('child node {}:\n'.format(i), child_or_op, file=sys.stderr)
+                    print('input:', json.dumps(new_obj, indent=1))
+                    traceback.print_exc()
+                if self.error:
+                    raise Exception
         return self.call(obj, new_obj, **kwargs)
 
     def is_duplicate(self, other) -> bool:
