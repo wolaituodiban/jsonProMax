@@ -7,10 +7,11 @@ from ...operator import Operator
 
 
 class JsonPathNode(Operator):
-    def __init__(self, inplace=False, error=False, warning=False):
+    def __init__(self, inplace=False, debug=False, error=False, warning=False):
         self.childs_or_processors: List[Union[JsonPathNode, Operator]] = []
-        self.error = error
+        self.debug = debug
         self.warning = warning
+        self.error = error
         super().__init__(inplace=inplace)
 
     def inplace(self, inplace: bool):
@@ -51,14 +52,16 @@ class JsonPathNode(Operator):
         for i, child_or_op in enumerate(self.childs_or_processors):
             try:
                 new_obj = child_or_op(new_obj, **kwargs)
-            except:
-                if self.warning:
+            except Exception as e:
+                if self.debug:
+                    print('{} encounter error'.format(self.__class__.__name__), file=sys.stderr)
                     print('current node:\n', self, file=sys.stderr)
                     print('child node {}:\n'.format(i), child_or_op, file=sys.stderr)
-                    print('input:', json.dumps(new_obj, indent=1))
+                    print('input:', json.dumps(new_obj, indent=1), file=sys.stderr)
+                if self.warning or self.debug:
                     traceback.print_exc()
-                if self.error:
-                    raise Exception
+                elif self.error:
+                    raise e
         return self.call(obj, new_obj, **kwargs)
 
     def is_duplicate(self, other) -> bool:
