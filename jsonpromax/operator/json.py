@@ -57,4 +57,4 @@ class ConcatList(Operator):
         return output
 
     def extra_repr(self):
-        return 'inputs={}, output={}'.format(self.inputs, self.output)
+        return "inputs={}, output='{}'".format(self.inputs, self.output)

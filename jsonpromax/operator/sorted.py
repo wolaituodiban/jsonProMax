@@ -23,5 +23,5 @@ class Sorted(Operator):
         else:
             return sorted(obj, key=self._get_key, reverse=self.reverse)
 
-    def __repr__(self):
-        return '{}(key={}, reverse={})'.format(self.__class__.__name__, self.key, self.reverse)
+    def extra_repr(self) -> str:
+        return "key='{}', reverse={}".format(self.key, self.reverse)

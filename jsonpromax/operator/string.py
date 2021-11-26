@@ -1,5 +1,3 @@
-import sys
-import traceback
 from .operator import Operator
 from ..utils import rm_ascii
 
@@ -49,7 +47,7 @@ class Rename(Operator):
         return obj
 
     def extra_repr(self):
-        return "old={}, new={}".format(self.old, self.new)
+        return "old='{}', new='{}'".format(self.old, self.new)
 
 
 class RemoveASCII(Operator):

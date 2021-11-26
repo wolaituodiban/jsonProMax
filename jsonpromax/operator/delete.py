@@ -16,5 +16,5 @@ class Delete(Operator):
     def _call(self, obj, **kwargs):
         return {k: v for k, v in obj.items() if k not in self.names}
 
-    def __repr__(self):
-        return '{}(names={})'.format(self.__class__.__name__, self.names)
+    def extra_repr(self):
+        return "names={}".format(self.names)

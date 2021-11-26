@@ -1,3 +1,5 @@
+import sys
+import traceback
 from typing import Union, List
 
 from ...operator import Operator
@@ -44,7 +46,12 @@ class JsonPathNode(Operator):
         if not flag:
             return obj
         for child_or_op in self.childs_or_processors:
-            new_obj = child_or_op(new_obj, **kwargs)
+            try:
+                new_obj = child_or_op(new_obj, **kwargs)
+            except:
+                print('current node:', self, file=sys.stderr)
+                print('child node:', child_or_op, file=sys.stderr)
+                traceback.print_exc()
         return self.call(obj, new_obj, **kwargs)
 
     def is_duplicate(self, other) -> bool:
