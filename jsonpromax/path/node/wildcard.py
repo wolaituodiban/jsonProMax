@@ -9,15 +9,15 @@ class Wildcard(JsonPathNode):
         if isinstance(obj, dict):
             output = dict()
             for k, v in obj.items():
-                for child_or_op in self.childs_or_processors:
-                    v = child_or_op(v, **kwargs)
+                for j in range(len(self.childs_or_processors)):
+                    v = self._run_op(v, j, **kwargs)
                 output[k] = v
             return output
         elif isinstance(obj, list):
             output = []
             for v in obj:
-                for child_or_op in self.childs_or_processors:
-                    v = child_or_op(v, **kwargs)
+                for j in range(len(self.childs_or_processors)):
+                    v = self._run_op(v, j, **kwargs)
                 output.append(v)
             return output
         return obj
@@ -25,13 +25,13 @@ class Wildcard(JsonPathNode):
     def _call_inplace(self, obj, **kwargs):
         if isinstance(obj, dict):
             for k, v in obj.items():
-                for child_or_op in self.childs_or_processors:
-                    v = child_or_op(v, **kwargs)
+                for j in range(len(self.childs_or_processors)):
+                    v = self._run_op(v, j, **kwargs)
                 obj[k] = v
         elif isinstance(obj, list):
             for i, v in enumerate(obj):
-                for child_or_op in self.childs_or_processors:
-                    v = child_or_op(v, **kwargs)
+                for j in range(len(self.childs_or_processors)):
+                    v = self._run_op(v, j, **kwargs)
                 obj[i] = v
         return obj
 

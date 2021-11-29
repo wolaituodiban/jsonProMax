@@ -9,6 +9,10 @@ def test_delete():
     assert a == {'a': 1, 'b': 2}, a
     assert b == {'a': 1}, b
 
+    op.inplace(True)
+    b = op(a)
+    assert a == b == {'a': 1}, (a, b)
+
 
 def test_speed():
     rounds = int(1e7)

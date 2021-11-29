@@ -104,7 +104,9 @@ json_path_tree = jpm.JsonPathTree(
 
 
 def test():
-
+    json_path_tree.debug(True)
+    json_path_tree.warning(True)
+    json_path_tree.error(True)
     print(json_path_tree)
     standard_answer = next(preprocessor(data))
     obj = json.loads(data.json[0])
@@ -113,23 +115,29 @@ def test():
     assert answer == standard_answer, json.dumps(jpm.json_diff(answer, standard_answer), indent=1)
     assert obj == json.loads(data.json[0])
 
+    json_path_tree.inplace(True)
+    obj = json.loads(data.json[0])
+    answer = json_path_tree(obj, now=datetime.strptime(data.crt_dte[0], '%Y-%m-%d'))
+    assert answer == standard_answer, json.dumps(jpm.json_diff(answer, standard_answer), indent=1)
+
 
 def speed():
     df = pd.concat([data] * 100000)
 
+    for standard_answer in tqdm(preprocessor(df), total=df.shape[0]):
+        pass
+    json_path_tree.inplace(False)
     for row in tqdm(df.itertuples(), total=df.shape[0], desc='outplace'):
         obj = json.loads(row[1])
         crt_dte = datetime.strptime(row[2], '%Y-%m-%d')
         answer = json_path_tree(obj, now=crt_dte)
+    assert answer == standard_answer
 
     json_path_tree.inplace(True)
     for row in tqdm(df.itertuples(), total=df.shape[0], desc='inplace'):
         obj = json.loads(row[1])
         crt_dte = datetime.strptime(row[2], '%Y-%m-%d')
         answer = json_path_tree(obj, now=crt_dte)
-
-    for standard_answer in tqdm(preprocessor(df), total=df.shape[0]):
-        pass
 
     assert answer == standard_answer
 
