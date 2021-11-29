@@ -56,3 +56,15 @@ class RemoveASCII(Operator):
 
     def __call__(self, obj, **kwargs):
         return rm_ascii(obj)
+
+
+class Slice(Operator):
+    def __init__(self, _slice: slice):
+        super().__init__(inplace=False)
+        self._slice = _slice
+
+    def __call__(self, obj, **kwargs):
+        return obj[self._slice]
+
+    def extra_repr(self) -> str:
+        return 'slice={}'.format(self._slice)

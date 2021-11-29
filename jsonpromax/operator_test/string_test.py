@@ -12,5 +12,16 @@ def test_rename():
     assert c == {'b': 1} == a, (a, c)
 
 
+def test_slice():
+    op = jpm.Slice(slice(1))
+    print(op)
+
+    a = 'bb'
+    b = op(a)
+    assert a == 'bb', a
+    assert b == 'b', b
+
+
 if __name__ == '__main__':
     test_rename()
+    test_slice()
