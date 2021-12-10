@@ -16,5 +16,5 @@ setup(
     version=get_version(),
     author='xiaotian chen',
     author_email='wolaituodiban@gmail.com',
-    packages=find_packages(include=('jsonpromax/',), exclude=('*test*',)),
+    packages=find_packages(),
 )
