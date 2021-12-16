@@ -57,17 +57,21 @@ class Timestamp(Operator):
 
 
 class Timestamp2(Operator):
-    def __init__(self, _format, units, inplace=False):
+    def __init__(self, _format, units, second=True, inplace=False):
         super().__init__(inplace=inplace)
         self.format = _format
         self.units = units
+        self.second = second
 
     def __call__(self, obj, now: datetime = None, **kwargs):
         output = {}
         time = datetime.strptime(obj, self.format)
         if now is not None:
             diff = now - time
-            output['diff_day'] = diff.days + int(diff.seconds > 0)
+            if self.second:
+                output['diff_second'] = diff.total_seconds()
+            else:
+                output['diff_day'] = diff.days + int(diff.seconds > 0)
         for unit in self.units:
             if unit == 'weekday':
                 output[unit] = time.weekday()
@@ -76,7 +80,7 @@ class Timestamp2(Operator):
         return output
 
     def extra_repr(self):
-        return "units='{}'".format(list(self.units))
+        return "units='{}', second={}".format(list(self.units), self.second)
 
 
 class Timestamp3(Operator):
