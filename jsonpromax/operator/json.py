@@ -6,7 +6,7 @@ from .operator import Operator
 from ..utils import unstructurize_dict
 
 
-class JsonDumper(Operator):
+class JsonLoader(Operator):
     def __init__(self):
         super().__init__(inplace=False)
 
