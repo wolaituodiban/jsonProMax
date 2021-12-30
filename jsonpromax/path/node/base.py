@@ -35,7 +35,8 @@ class JsonPathNode(Operator):
     def inplace(self, inplace: bool):
         super().inplace(inplace)
         for child_or_op in self.childs_or_processors:
-            child_or_op.inplace(inplace)
+            if isinstance(child_or_op, JsonPathNode):
+                child_or_op.inplace(inplace)
 
     def get(self, obj):
         """

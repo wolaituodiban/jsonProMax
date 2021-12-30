@@ -26,14 +26,19 @@ class JsonPathTree(JsonPathNode):
     https://jsonpath.com/
     https://goessner.net/articles/JsonPath/
     """
-    def __init__(self, processors: List[Union[Tuple[str], Tuple[str, Operator]]] = None, inplace=False):
-        super().__init__(inplace=inplace)
+    def __init__(
+            self, processors: List[Union[Tuple[str], Tuple[str, Operator]]] = None, inplace=False, debug=False,
+            error=False, warning=False):
+        super().__init__(inplace=inplace, debug=debug, error=error, warning=warning)
 
         if processors is not None:
             for args in processors:
                 insert_node(self, *args)
 
         self.inplace(inplace)
+        self.debug(debug)
+        self.error(error)
+        self.warning(warning)
 
     def is_duplicate(self, other) -> bool:
         raise NotImplementedError
