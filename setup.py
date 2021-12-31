@@ -17,4 +17,7 @@ setup(
     author='xiaotian chen',
     author_email='wolaituodiban@gmail.com',
     packages=find_packages(),
+    install_requires=[
+        'pandas',
+    ],
 )
