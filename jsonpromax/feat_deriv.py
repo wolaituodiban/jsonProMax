@@ -36,13 +36,13 @@ class FeatureDerivation(JsonPathTree):
         df[features.columns] = features.values
         return df
 
-    def save(self, dfs: Iterable[pd.DataFrame], dst: str, chunksize=1000, processes=None, disable=True):
+    def to_csv(self, dfs: Iterable[pd.DataFrame], dst: str, pre_nrows=1000, processes=None, disable=True):
         """
 
         Args:
             dfs:
             dst:
-            chunksize: 由于每一个样本衍生出的特征可能不一样，需要感觉前n个样本确定最终文件的列数
+            pre_nrows: 由于每一个样本衍生出的特征可能不一样，需要感觉前n个样本确定最终文件的列数
             processes: 多进程个数
             disable:
 
@@ -56,7 +56,7 @@ class FeatureDerivation(JsonPathTree):
                 if columns is None:
                     # 首先根据前chunksize个判断特征数量
                     buffer = pd.concat([buffer, df])
-                    if buffer.shape[0] > chunksize:
+                    if buffer.shape[0] > pre_nrows:
                         columns = df.columns
                         buffer.to_csv(file, index=False)
                         buffer = None

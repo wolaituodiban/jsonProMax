@@ -1,3 +1,4 @@
+import sys
 import re
 
 
@@ -55,3 +56,18 @@ def get_json_depth(obj, depth=0):
             return depth
     else:
         return depth
+
+
+class HiddenPrints:
+    def __init__(self, disable):
+        self.disable = disable
+
+    def __enter__(self):
+        if self.disable:
+            self._original_stdout = sys.stdout
+            sys.stdout = open(os.devnull, 'w')
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if hasattr(self, '_original_stdout'):
+            sys.stdout.close()
+            sys.stdout = self._original_stdout
