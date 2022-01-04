@@ -68,4 +68,4 @@ class ListFeature(Operator):
                 g.columns = ['{s}({c})'.format(s=s, c=c) for c in g.columns]
                 outputs.update(self._call_df(g))
                 outputs['length({s})'.format(s=s)] = g.shape[0]
-        return outputs
+        return {k: float(v) for k, v in outputs.items()}
