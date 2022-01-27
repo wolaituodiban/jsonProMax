@@ -15,23 +15,23 @@ except ImportError:
 
 
 class FeatureDerivation(JsonPathTree):
-    def __init__(self, json_col, time_col, time_format, processors, **kwargs):
+    def __init__(self, json_col, time_col, time_format, processors, tokenizer=None, **kwargs):
         super().__init__(processors=processors, **kwargs)
         self.json_col = json_col
         self.time_col = time_col
         self.time_format = time_format
+        self.tokenizer = tokenizer
 
     def derivate(self, df: pd.DataFrame, disable=True):
         def strptime(s):
             if pd.notna(s):
                 return ddt.strptime(s, self.time_format)
 
-        features = pd.DataFrame(
-            tqdm(
-                (self(row[self.json_col], now=strptime(row[self.time_col])) for _, row in df.iterrows()),
-                disable=disable
-            )
+        iterable = (
+            self(row[self.json_col], now=strptime(row[self.time_col]), tokenizer=self.tokenizer)
+            for _, row in df.iterrows()
         )
+        features = pd.DataFrame(tqdm(iterable, disable=disable))
         df = df.drop(columns='data').copy()
         df[features.columns] = features.values
         return df
