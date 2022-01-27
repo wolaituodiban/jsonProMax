@@ -17,7 +17,7 @@ def get_name(f):
 
 class ListFeature(Operator):
     def __init__(self, time_key=None, seconds=None, minutes=None, hours=None, days=None, funcs=None, binary_funcs=None,
-                 corr=False):
+                 corr=False, first_last=True):
         super().__init__(inplace=False)
         self.time_key = time_key
         seconds = seconds or []
@@ -30,6 +30,7 @@ class ListFeature(Operator):
         binary_funcs = binary_funcs or {}
         self.binary_funcs = {get_name(f): f for f in binary_funcs}
         self.corr = corr
+        self.first_last = first_last
 
     def _time_key(self, time):
         for i, second in enumerate(self.seconds):
@@ -41,8 +42,9 @@ class ListFeature(Operator):
 
     def _call_df(self, df):
         outputs = {}
-        outputs.update({'first({})'.format(k): v for k, v in df.iloc[0].items()})
-        outputs.update({'last({})'.format(k): v for k, v in df.iloc[-1].items()})
+        if self.first_last:
+            outputs.update({'first({})'.format(k): v for k, v in df.iloc[0].items()})
+            outputs.update({'last({})'.format(k): v for k, v in df.iloc[-1].items()})
         if self.corr and df.shape[1] > 1:
             corr = df.corr()
             for c1, c2 in combinations(df, 2):
