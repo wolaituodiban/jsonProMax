@@ -1,6 +1,7 @@
 from inspect import isfunction
 from itertools import combinations
 
+import numpy as np
 import pandas as pd
 from .operator import Operator
 
@@ -69,3 +70,8 @@ class ListFeature(Operator):
                 outputs.update(self._call_df(g))
                 outputs['length({s})'.format(s=s)] = g.shape[0]
         return {k: float(v) for k, v in outputs.items()}
+
+#
+# class ListFeatureLite(Operator):
+#     np.corrcoef()
+#     pass
