@@ -21,7 +21,7 @@ def test_feat_deriv():
     processor.to_csv([data], 'test.csv', disable=False)
     df2 = pd.read_csv('test.csv')
     assert df2.shape == (10, 3)
-    processor.to_csv([data], 'test.csv', pre_nrows=1, disable=False)
+    processor.to_csv([data], 'test.csv', disable=False)
     df3 = pd.read_csv('test.csv')
     assert df3.shape == (10, 3)
 

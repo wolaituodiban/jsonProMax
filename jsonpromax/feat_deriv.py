@@ -1,3 +1,5 @@
+import os
+import shutil
 from datetime import datetime as ddt
 from multiprocessing import Pool
 from typing import Iterable
@@ -36,35 +38,58 @@ class FeatureDerivation(JsonPathTree):
         df[features.columns] = features.values
         return df
 
-    def to_csv(self, dfs: Iterable[pd.DataFrame], dst: str, pre_nrows=1000, processes=None, disable=True):
+    def to_csv(self, dfs: Iterable[pd.DataFrame], dst: str, processes=None, disable=False, dropna=0.99):
         """
 
         Args:
             dfs:
             dst:
-            pre_nrows: 由于每一个样本衍生出的特征可能不一样，需要感觉前n个样本确定最终文件的列数
             processes: 多进程个数
             disable:
-
+            dropna: 删除缺失率大于这个值的特征
         Returns:
 
         """
-        with Pool(processes=processes) as pool, open(dst, 'w') as file:
-            buffer = pd.DataFrame()
-            columns = None
-            for df in tqdm(pool.imap_unordered(self.derivate, dfs), disable=disable):
-                if columns is None:
-                    # 首先根据前chunksize个判断特征数量
-                    buffer = pd.concat([buffer, df])
-                    if buffer.shape[0] > pre_nrows:
-                        columns = df.columns
-                        buffer.to_csv(file, index=False)
-                        buffer = None
-                else:
-                    for col in columns:
-                        if col not in df:
-                            df[col] = None
-                    df = df[columns]
-                    df.to_csv(file, header=False, index=False)
-            if buffer is not None:
-                buffer.to_csv(file, index=False)
+        origin_columns = None  # 记录排在最前的几个原始字段的位置
+        with Pool(processes=processes) as pool, tqdm(disable=disable, desc='stage 1') as bar:
+            dir_path = dst + '_tmp_'
+            os.mkdir(dir_path)
+            paths = []
+            n_sample = 0
+            nums = {}
+            for i, df in enumerate(pool.imap_unordered(self.derivate, dfs)):
+                if origin_columns is None:
+                    origin_columns = df.columns
+                # 用于计算缺失率
+                n_sample += df.shape[0]
+                for k, v in df.notna().sum().items():
+                    if k not in nums:
+                        nums[k] = v
+                    else:
+                        nums[k] += v
+                path = os.path.join(dir_path, '{}.zip'.format(i))
+                paths.append(path)
+                df.to_csv(path, index=False)
+                bar.update()
+                bar.set_postfix({'num of columns': len(nums)})
+        na_rate = {k: 1 - v / n_sample for k, v in nums.items()}
+        temp = {k for k, v in na_rate.items() if v < dropna}
+        columns = []
+        # 保持原始字段的位置在最前
+        for col in origin_columns:
+            if col in temp:
+                columns.append(col)
+        columns += temp.difference(columns)
+        with open(dst, 'w') as file, tqdm(disable=disable, desc='stage 2') as bar:
+            header = True
+            for path in paths:
+                df = pd.read_csv(path)
+                df[list(temp.difference(df.columns))] = None
+                df = df[columns]
+                df.to_csv(file, index=False, header=header)
+                header = False
+                os.remove(path)
+                bar.update()
+                bar.set_postfix({'num of columns': len(columns)})
+            shutil.rmtree(dir_path)
+        return na_rate

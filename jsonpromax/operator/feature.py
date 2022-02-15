@@ -1,7 +1,6 @@
 from inspect import isfunction
 from itertools import combinations
 
-import numpy as np
 import pandas as pd
 from .operator import Operator
 
@@ -77,3 +76,55 @@ class ListFeature(Operator):
 # class ListFeatureLite(Operator):
 #     np.corrcoef()
 #     pass
+
+
+class CountListItem(Operator):
+    def __init__(self, key, inplace=False):
+        super().__init__(inplace=inplace)
+        self.key = key
+
+    def _call(self, obj, **kwargs):
+        if self.key not in obj:
+            return obj
+        obj = dict(obj)
+        count = {}
+        for v in obj[self.key]:
+            if v in count:
+                count[v] += 1
+            else:
+                count[v] = 1
+        for k, v in count.items():
+            obj['count({}.{})'.format(self.key, k)] = v
+        return obj
+
+    def _call_inplace(self, obj, **kwargs):
+        if self.key not in obj:
+            return obj
+        count = dict()
+        for v in obj[self.key]:
+            if v in count:
+                count[v] += 1
+            else:
+                count[v] = 1
+        for k, v in count.items():
+            obj['count({}.{})'.format(self.key, k)] = v
+        return obj
+
+
+class OneHot(Operator):
+    def __init__(self, key, inplace=False):
+        super().__init__(inplace=inplace)
+        self.key = key
+
+    def _call(self, obj, **kwargs):
+        if self.key not in obj:
+            return obj
+        obj = dict(obj)
+        obj['{}={}'.format(self.key, obj[self.key])] = 1
+        return obj
+
+    def _call_inplace(self, obj, **kwargs):
+        if self.key not in obj:
+            return obj
+        obj['{}={}'.format(self.key, obj[self.key])] = 1
+        return obj

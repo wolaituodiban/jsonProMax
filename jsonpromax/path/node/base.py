@@ -125,6 +125,6 @@ class JsonPathNode(Operator):
         output = self.extra_repr()
         for child_or_processor in self.childs_or_processors:
             strs = str(child_or_processor).split('\n')
-            strs[0] = '|____' + strs[0]
-            output += ''.join(['\n     ' + line for line in strs])
+            strs[0] = '|__' + strs[0]
+            output += ''.join(['\n   ' + line for line in strs])
         return output

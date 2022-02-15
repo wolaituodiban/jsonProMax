@@ -58,3 +58,48 @@ class ConcatList(Operator):
 
     def extra_repr(self):
         return "inputs={}, output='{}'".format(self.inputs, self.output)
+
+
+class Subscribe(Operator):
+    def __init__(self, i):
+        super().__init__(inplace=False)
+        self.i = i
+
+    def __call__(self, obj, **kwargs):
+        return obj[self.i]
+
+
+class Flatten(Operator):
+    def __init__(self, key, inplace=False):
+        super().__init__(inplace=inplace)
+        self.key = key
+
+    def _call(self, obj, **kwargs):
+        if self.key not in obj:
+            return obj
+        obj = dict(obj)
+        for k, v in obj[self.key].items():
+            obj['{}.{}'.format(self.key, k)] = v
+        return obj
+
+    def _call_inplace(self, obj, **kwargs):
+        if self.key not in obj:
+            return obj
+        for k, v in obj[self.key].items():
+            obj['{}.{}'.format(self.key, k)] = v
+        return obj
+
+
+class Updator(Operator):
+    def __init__(self, d: dict, inplace=False):
+        super().__init__(inplace=inplace)
+        self.d = d
+
+    def _call(self, obj, **kwargs):
+        obj = dict(obj)
+        obj.update(self.d)
+        return obj
+
+    def _call_inplace(self, obj, **kwargs):
+        obj.update(self.d)
+        return obj

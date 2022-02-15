@@ -1,6 +1,6 @@
 from .delete import Delete
-from .feature import ListFeature
-from .json import JsonLoader, Unstructurizer, DictGetter, ConcatList
+from .feature import ListFeature, OneHot, CountListItem
+from .json import JsonLoader, Unstructurizer, DictGetter, ConcatList, Subscribe, Flatten, Updator
 from .math import Mean
 from .operator import Operator
 from .sorted import Sorted
