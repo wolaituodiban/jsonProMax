@@ -74,13 +74,14 @@ class FeatureDerivation(JsonPathTree):
                 bar.set_postfix({'num of columns': len(nums)})
         na_rate = {k: 1 - v / n_sample for k, v in nums.items()}
         temp = {k for k, v in na_rate.items() if v < dropna}
-        columns = []
+        columns = [self.time_col]
         # 保持原始字段的位置在最前
         for col in origin_columns:
-            if col in temp:
+            if col in temp and col not in columns:
                 columns.append(col)
         columns += temp.difference(columns)
-        with open(dst, 'w') as file, tqdm(disable=disable, desc='stage 2') as bar:
+        with open(dst, 'w') as file,\
+                tqdm(disable=disable, desc='stage 2', postfix={'num of columns': len(columns)}) as bar:
             header = True
             for path in paths:
                 df = pd.read_csv(path)
@@ -90,6 +91,5 @@ class FeatureDerivation(JsonPathTree):
                 header = False
                 os.remove(path)
                 bar.update()
-                bar.set_postfix({'num of columns': len(columns)})
             shutil.rmtree(dir_path)
         return na_rate

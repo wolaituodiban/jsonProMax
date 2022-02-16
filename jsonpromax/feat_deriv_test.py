@@ -14,7 +14,7 @@ def test_feat_deriv():
         time_format=None,
         processors=[
             ('$', jpm.ListFeature(funcs=['mean']))
-        ]
+        ],
     )
     df = processor.derivate(data, disable=False)
     print(df)
