@@ -63,6 +63,8 @@ class ListFeature(Operator):
 
     def __call__(self, obj, **kwargs):
         df = pd.DataFrame(obj)
+        if df.shape[0] == 0:
+            return dict()
         outputs = self._call_df(df)
         outputs['length'] = df.shape[0]
         if self.time_key is not None and self.time_key in df and len(self.seconds) > 0:
