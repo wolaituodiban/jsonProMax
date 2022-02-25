@@ -28,17 +28,21 @@ class JsonPathTree(JsonPathNode):
     """
     def __init__(
             self, processors: List[Union[Tuple[str], Tuple[str, Operator]]] = None, inplace=False, debug=False,
-            error=False, warning=False):
+            error=False, warning=False, tokenizer=None):
         super().__init__(inplace=inplace, debug=debug, error=error, warning=warning)
 
         if processors is not None:
             for args in processors:
                 insert_node(self, *args)
+        self.tokenizer = tokenizer
 
         self.inplace(inplace)
         self.debug(debug)
         self.error(error)
         self.warning(warning)
+
+    def __call__(self, *args, **kwargs):
+        return super().__call__(*args, tokenizer=self.tokenizer, **kwargs)
 
     def is_duplicate(self, other) -> bool:
         raise NotImplementedError
