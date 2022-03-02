@@ -33,7 +33,12 @@ class Cut(Operator):
 
     @lru_cache()
     def __call__(self, obj: str, tokenizer=None, **kwargs):
-        return tokenizer.lcut(obj)
+        output = tokenizer.lcut(obj)
+        if len(output) == 0:
+            output = None
+        elif len(output) == 1:
+            output = output[0]
+        return output
 
 
 class Rename(Operator):

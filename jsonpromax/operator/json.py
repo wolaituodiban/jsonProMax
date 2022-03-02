@@ -113,7 +113,9 @@ class CutKey(Operator):
     @lru_cache()
     def cut(s, tokenizer, **kwargs):
         output = tuple(tokenizer.lcut(s))
-        if len(output) == 1:
+        if len(output) == 0:
+            output = s
+        elif len(output) == 1:
             output = output[0]
         return output
 
