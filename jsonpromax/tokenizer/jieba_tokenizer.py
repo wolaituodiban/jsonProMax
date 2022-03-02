@@ -39,7 +39,7 @@ _default_tokenizer = None
 def default_tokenizer():
     global _default_tokenizer
     if _default_tokenizer is None and JiebaTokenizer is not None:
-        stopwords = set(string.ascii_letters).union(string.punctuation).union(string.digits).union([' ', '__'])
+        stopwords = set(string.ascii_letters).union(string.punctuation).union(string.digits).union([' ', '__', ''])
         stopwords = stopwords.union("，。/；‘【】、·-=～——+）（*&……%¥#@！「」｜“：？》《")
         _default_tokenizer = JiebaTokenizer(camel_to_snake=True, stopwords=stopwords)
     return _default_tokenizer

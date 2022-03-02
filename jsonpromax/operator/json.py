@@ -1,5 +1,5 @@
 import json as py_json
-
+from functools import lru_cache
 from typing import Set
 
 from .operator import Operator
@@ -103,3 +103,16 @@ class Updator(Operator):
     def _call_inplace(self, obj, **kwargs):
         obj.update(self.d)
         return obj
+
+
+class CutKey(Operator):
+    def __init__(self):
+        super().__init__(False)
+
+    @staticmethod
+    @lru_cache()
+    def cut(s, tokenizer, **kwargs):
+        return tuple(tokenizer.cut(s))
+
+    def __call__(self, obj, **kwargs):
+        return {self.cut(k, **kwargs): v for k, v in obj.items()}

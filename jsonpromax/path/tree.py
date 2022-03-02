@@ -42,7 +42,10 @@ class JsonPathTree(JsonPathNode):
         self.warning(warning)
 
     def __call__(self, *args, **kwargs):
-        return super().__call__(*args, tokenizer=self.tokenizer, **kwargs)
+        if self.tokenizer is not None:
+            return super().__call__(*args, tokenizer=self.tokenizer, **kwargs)
+        else:
+            return super().__call__(*args, **kwargs)
 
     def is_duplicate(self, other) -> bool:
         raise NotImplementedError
