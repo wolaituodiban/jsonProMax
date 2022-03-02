@@ -7,6 +7,8 @@ def test():
     print(tokenizer)
     print(tokenizer.lcut(s))
     print(default_tokenizer())
+    print(list(default_tokenizer().cut(s)))
+    print(list(default_tokenizer().cut(s)))
     print(default_tokenizer().lcut(s))
 
 

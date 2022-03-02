@@ -1,4 +1,5 @@
 import string
+from functools import lru_cache
 from typing import Iterable, List
 
 from .tokenizer import Tokenizer
@@ -17,6 +18,7 @@ class JiebaTokenizer(Tokenizer):
         self.camel_to_snake = camel_to_snake
         self.stopwords = stopwords
 
+    # ! cut返回的是一个生成器，不能加缓存
     def cut(self, s: str, **kwargs) -> Iterable[str]:
         if self.camel_to_snake:
             from ..utils import camel_to_snake
@@ -26,6 +28,7 @@ class JiebaTokenizer(Tokenizer):
             output = (x for x in output if x not in self.stopwords)
         return output
 
+    @lru_cache()
     def lcut(self, s: str, **kwargs) -> List[str]:
         return list(self.cut(s, **kwargs))
 

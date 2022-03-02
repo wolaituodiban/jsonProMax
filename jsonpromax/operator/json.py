@@ -112,7 +112,10 @@ class CutKey(Operator):
     @staticmethod
     @lru_cache()
     def cut(s, tokenizer, **kwargs):
-        return tuple(tokenizer.cut(s))
+        output = tuple(tokenizer.lcut(s))
+        if len(output) == 1:
+            output = output[0]
+        return output
 
     def __call__(self, obj, **kwargs):
         return {self.cut(k, **kwargs): v for k, v in obj.items()}
