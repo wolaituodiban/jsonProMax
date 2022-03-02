@@ -1,11 +1,12 @@
 import string
 from typing import Iterable, List
-import jieba
+
 from .tokenizer import Tokenizer
 
 
 class JiebaTokenizer(Tokenizer):
     def __init__(self, dictionary=None, camel_to_snake=False, stopwords=None):
+        import jieba
         if dictionary is not None:
             tokenizer = jieba.Tokenizer(dictionary)
         else:

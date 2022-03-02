@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from .operator import Operator
 from ..utils import rm_ascii
 
@@ -6,6 +8,7 @@ class Lower(Operator):
     def __init__(self):
         super().__init__(inplace=False)
 
+    @lru_cache()
     def __call__(self, obj, **kwargs):
         return obj.lower()
 
@@ -16,6 +19,7 @@ class Split(Operator):
         self.sep = sep
         self.maxsplit = maxsplit
 
+    @lru_cache()
     def __call__(self, obj: str, **kwargs):
         return obj.split(sep=self.sep, maxsplit=self.maxsplit)
 
@@ -27,6 +31,7 @@ class Cut(Operator):
     def __init__(self):
         super().__init__(inplace=False)
 
+    @lru_cache()
     def __call__(self, obj: str, tokenizer=None, **kwargs):
         return tokenizer.lcut(obj)
 
@@ -54,6 +59,7 @@ class RemoveASCII(Operator):
     def __init__(self):
         super().__init__(inplace=False)
 
+    @lru_cache()
     def __call__(self, obj, **kwargs):
         return rm_ascii(obj)
 
