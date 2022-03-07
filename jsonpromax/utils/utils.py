@@ -1,5 +1,26 @@
 import sys
 import re
+import os
+from datetime import datetime as ddt
+from functools import partial
+
+import pandas as pd
+
+
+try:
+    from dgl.multiprocessing import Pool
+except ImportError:
+    try:
+        from torch.multiprocessing import Pool
+    except ImportError:
+        from multiprocessing import Pool
+
+
+try:
+    from tqdm import tqdm
+except ImportError:
+    def tqdm(x, *args, **kwargs):
+        return x
 
 
 def rm_ascii(s):
@@ -71,3 +92,24 @@ class HiddenPrints:
         if hasattr(self, '_original_stdout'):
             sys.stdout.close()
             sys.stdout = self._original_stdout
+
+
+def strptime(s, time_format):
+    if pd.notna(s):
+        return ddt.strptime(s, time_format)
+
+
+def mp_run(fn, data, kwds=None, processes=0, chunksize=1, disable=False, postfix=None, **kwargs):
+    if kwds is not None:
+        fn = partial(fn, **kwds)
+    with tqdm(data, disable=disable, postfix=postfix, **kwargs) as bar:
+        if processes == 0:
+            for item in map(fn, data):
+                bar.update()
+                yield item
+        else:
+            with Pool(processes=processes) as pool:
+                for item in pool.imap(fn, data, chunksize=chunksize):
+                    bar.update()
+                    yield item
+

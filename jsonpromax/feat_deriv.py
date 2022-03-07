@@ -1,6 +1,5 @@
 import os
 import shutil
-from datetime import datetime as ddt
 from multiprocessing import Pool
 from typing import Iterable
 
@@ -8,6 +7,7 @@ import pandas as pd
 
 
 from .path import JsonPathTree
+from .utils import strptime
 
 try:
     from tqdm import tqdm
@@ -24,12 +24,9 @@ class FeatureDerivation(JsonPathTree):
         self.time_format = time_format
 
     def derivate(self, df: pd.DataFrame, disable=True):
-        def strptime(s):
-            if pd.notna(s):
-                return ddt.strptime(s, self.time_format)
 
         iterable = (
-            self(row[self.json_col], now=strptime(row[self.time_col]))
+            self(row[self.json_col], now=strptime(row[self.time_col], self.time_format))
             for _, row in df.iterrows()
         )
         features = pd.DataFrame(tqdm(iterable, disable=disable))

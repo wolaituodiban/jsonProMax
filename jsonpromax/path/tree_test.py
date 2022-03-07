@@ -1,4 +1,6 @@
 import json
+import os
+import shutil
 from datetime import datetime
 
 import pandas as pd
@@ -121,6 +123,21 @@ def test():
     assert answer == standard_answer, json.dumps(jpm.json_diff(answer, standard_answer), indent=1)
 
 
+def test_save():
+    if os.path.exists('temp'):
+        shutil.rmtree('temp')
+    os.mkdir('temp')
+    inputs = (pd.concat([data] * 10) for _ in range(100))
+    json_path_tree.save(
+        inputs, 'temp', data_col='json', time_col='crt_dte', time_format='%Y-%m-%d',
+        processes=0
+    )
+    print(pd.read_csv('temp/0.zip').json[0])
+    print(pd.read_csv('temp_path.zip'))
+    shutil.rmtree('temp')
+    os.remove('temp_path.zip')
+
+
 def speed():
     df = pd.concat([data] * 100000)
 
@@ -144,4 +161,5 @@ def speed():
 
 if __name__ == '__main__':
     test()
+    test_save()
     speed()
