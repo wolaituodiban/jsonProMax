@@ -72,7 +72,7 @@ class JsonPathTree(JsonPathNode):
         inputs = ((chunk, os.path.join(dst, '{}.zip'.format(i))) for i, chunk in enumerate(chunks))
         kwds = dict(data_col=data_col, time_col=time_col, time_format=time_format)
         path_df = pd.concat(mp_run(self._save, inputs, kwds=kwds, processes=processes))
-        path_df.to_csv(dst + '_path.zip')
+        path_df.to_csv(os.path.abspath(dst) + '_path.zip')
         return path_df
 
     def is_duplicate(self, other) -> bool:
